@@ -5,6 +5,41 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
+const SAMPLE = JSON.stringify(
+  {
+    users: [
+      {
+        id: 1,
+        name: "Alice Chen",
+        email: "alice@example.com",
+        role: "admin",
+        permissions: ["read", "write", "delete"],
+        metadata: { department: "Engineering", level: "L5", joined: "2023-03-15" },
+      },
+      {
+        id: 2,
+        name: "Bob Smith",
+        email: "bob@example.com",
+        role: "editor",
+        permissions: ["read", "write"],
+        metadata: { department: "Design", level: "L4", joined: "2024-01-10" },
+      },
+      {
+        id: 3,
+        name: "Carol Wang",
+        email: "carol@example.com",
+        role: "viewer",
+        permissions: ["read"],
+        metadata: { department: "Marketing", level: "L3", joined: "2024-06-20" },
+      },
+    ],
+    pagination: { page: 1, perPage: 20, total: 3, totalPages: 1 },
+    _links: { self: "/api/v1/users?page=1", next: null, prev: null },
+  },
+  null,
+  2,
+);
+
 export function JsonFormatter() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
@@ -107,6 +142,9 @@ export function JsonFormatter() {
         </Button>
         <Button onClick={copyOutput} variant="outline" size="sm" disabled={!output}>
           Copy Result
+        </Button>
+        <Button onClick={() => { setInput(SAMPLE); setOutput(""); setError(null); }} variant="outline" size="sm">
+          Load Sample
         </Button>
         <Button onClick={clear} variant="ghost" size="sm">
           Clear
