@@ -26,6 +26,24 @@ export const metadata: Metadata = {
     "free online tools",
     "developer tools",
   ],
+  openGraph: {
+    type: "website",
+    siteName: "Free Toolkit",
+    title: "Free Online Developer Tools - JSON Formatter, Base64, JWT & More",
+    description:
+      "Free online developer tools. Format JSON, encode Base64, debug JWT, test regex, generate UUIDs and more. All processing happens in your browser.",
+    url: "https://free-toolkit.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free Online Developer Tools",
+    description:
+      "Free online developer tools. Format JSON, encode Base64, debug JWT, test regex, generate UUIDs and more. All client-side processing.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

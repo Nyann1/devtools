@@ -1,6 +1,23 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { JsonLd } from "@/components/json-ld";
+
+const webSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Free Toolkit",
+  url: "https://free-toolkit.com",
+  description: "Free online developer tools. Format JSON, encode Base64, debug JWT, test regex, generate UUIDs and more. All client-side processing.",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://free-toolkit.com/search?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
 
 const featuredTools = [
   {
@@ -78,6 +95,7 @@ const featuredTools = [
 export default function Home() {
   return (
     <>
+      <JsonLd data={webSiteSchema} />
       <section className="border-b bg-muted/20">
         <div className="container mx-auto px-4 py-20 md:py-28 text-center max-w-3xl">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
