@@ -92,7 +92,10 @@ export function Footer() {
             uploaded to any server.
           </p>
           <p>
-            Built with Next.js &middot; Open source on GitHub
+            <a href="mailto:1326813680@qq.com" className="hover:text-foreground transition-colors underline underline-offset-2">
+              Feedback? Email us
+            </a>
+            {" "}&middot; Built with Next.js
           </p>
         </div>
       </div>

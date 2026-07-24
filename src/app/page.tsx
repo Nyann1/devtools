@@ -140,6 +140,22 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="rounded-xl bg-primary/5 border border-primary/20 px-6 py-5">
+            <p className="text-sm font-medium mb-1">
+              This site is under active development
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Got a tool request or feedback?{" "}
+              <a href="mailto:1326813680@qq.com" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                1326813680@qq.com
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="container mx-auto px-4 py-16 border-t">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">
