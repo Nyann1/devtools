@@ -375,25 +375,23 @@ export function RegexTool() {
           <label className="text-sm font-medium mb-1 block text-muted-foreground">Pattern</label>
           <div className="flex gap-2">
             <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
-            <div className="relative flex-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-md">
-              <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono absolute inset-0 text-transparent caret-foreground bg-transparent border-input placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none" />
-              <div aria-hidden="true" className="font-mono text-base md:text-sm h-8 px-2.5 py-1 rounded-lg border border-transparent overflow-hidden whitespace-nowrap flex items-center pointer-events-none relative z-10 select-none">
-                {tokens.length > 0 ? (
-                  tokens.map((t, i) => (
-                    <span
-                      key={i}
-                      className={`${tokenTextColors[t.type] || ""} px-[1px] ${hoveredIndex === i ? "bg-yellow-300 dark:bg-yellow-700 rounded" : ""}`}
-                      onMouseEnter={() => setHoveredIndex(i)}
-                      onMouseLeave={() => setHoveredIndex(null)}
-                      style={{ pointerEvents: "auto" }}
-                    >{t.raw}</span>
-                  ))
-                ) : null}
-              </div>
-            </div>
+            <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono flex-1" />
             <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
             <Input value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="g" className="font-mono w-20" />
           </div>
+          {/* Token bar */}
+          {tokens.length > 0 && (
+            <div className="mt-1.5 font-mono text-sm px-2.5 py-1 rounded-md bg-muted/30 border overflow-hidden whitespace-nowrap">
+              {tokens.map((t, i) => (
+                <span
+                  key={i}
+                  className={`${tokenTextColors[t.type] || ""} px-[1px] cursor-default transition-colors ${hoveredIndex === i ? "bg-yellow-300 dark:bg-yellow-700 rounded" : ""}`}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >{t.raw}</span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Mode Tabs */}
