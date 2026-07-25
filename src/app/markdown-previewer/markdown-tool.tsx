@@ -93,13 +93,22 @@ async function generatePdf(html: string, columns: 1 | 2) {
 
   const filename = columns === 2 ? "markdown-two-column.pdf" : "markdown.pdf";
 
-  html2pdf().set({
-    margin: columns === 2 ? [1, 5, 1, 5] : 1,
+  container.style.position = "absolute";
+  container.style.left = "-9999px";
+  container.style.top = "0";
+  container.style.width = columns === 2 ? "210mm" : "190mm";
+  container.style.background = "#fff";
+  document.body.appendChild(container);
+
+  await html2pdf().set({
+    margin: columns === 2 ? [5, 5, 5, 5] : 10,
     filename,
     image: { type: "jpeg", quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
   }).from(container).save();
+
+  document.body.removeChild(container);
 }
 
 export function MarkdownTool() {
