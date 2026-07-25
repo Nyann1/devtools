@@ -62,6 +62,17 @@ const FLAG_DESCS: Record<string, string> = {
   y: "sticky — matches only from lastIndex position",
 };
 
+const tokenTextColors: Record<string, string> = {
+  "char-class": "text-blue-600 dark:text-blue-400",
+  "quantifier": "text-green-600 dark:text-green-400",
+  "anchor": "text-red-600 dark:text-red-400",
+  "group": "text-purple-600 dark:text-purple-400",
+  "lookaround": "text-purple-600 dark:text-purple-400",
+  "charset": "text-cyan-600 dark:text-cyan-400",
+  "alternation": "text-orange-600 dark:text-orange-400",
+  "escape": "text-rose-600 dark:text-rose-400",
+};
+
 function tokenizeRegex(pattern: string): Token[] {
   const tokens: Token[] = [];
   let i = 0;
@@ -294,6 +305,7 @@ export function RegexTool() {
   const [replace, setReplace] = useState("");
   const [mode, setMode] = useState<"match" | "replace">("match");
   const [refSearch, setRefSearch] = useState("");
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const result = useMemo((): RegexResult | null => {
     if (!pattern || !text) return null;
@@ -363,7 +375,22 @@ export function RegexTool() {
           <label className="text-sm font-medium mb-1 block text-muted-foreground">Pattern</label>
           <div className="flex gap-2">
             <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
-            <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono flex-1" />
+            <div className="relative flex-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-md">
+              <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono text-sm absolute inset-0 text-transparent caret-foreground bg-transparent border-input placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none" />
+              <div aria-hidden="true" className="font-mono text-sm h-9 px-3 py-1 rounded-md border border-transparent overflow-hidden whitespace-nowrap flex items-center pointer-events-none relative z-10">
+                {tokens.length > 0 ? (
+                  tokens.map((t, i) => (
+                    <span
+                      key={i}
+                      className={`${tokenTextColors[t.type] || ""} px-[1px] ${hoveredIndex === i ? "bg-yellow-300 dark:bg-yellow-700 rounded" : ""}`}
+                      onMouseEnter={() => setHoveredIndex(i)}
+                      onMouseLeave={() => setHoveredIndex(null)}
+                      style={{ pointerEvents: "auto" }}
+                    >{t.raw}</span>
+                  ))
+                ) : null}
+              </div>
+            </div>
             <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
             <Input value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="g" className="font-mono w-20" />
           </div>
@@ -474,7 +501,12 @@ export function RegexTool() {
             <h3 className="text-sm font-semibold mb-3">Explanation</h3>
             <div className="space-y-2">
               {tokens.map((t, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs">
+                <div
+                  key={i}
+                  className={`flex items-start gap-2 text-xs rounded px-1 py-0.5 -mx-1 cursor-default transition-colors ${hoveredIndex === i ? "bg-yellow-100 dark:bg-yellow-900/30" : ""}`}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
                   <code className={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-mono text-xs ${
                     t.type === "char-class" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
                     t.type === "quantifier" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
