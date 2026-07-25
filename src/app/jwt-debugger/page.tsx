@@ -3,17 +3,18 @@ import { ToolLayout } from "@/components/tool-layout";
 import { JwtTool } from "./jwt-tool";
 
 export const metadata: Metadata = {
-  title: "JWT Debugger - Decode and Inspect JSON Web Tokens Online",
-  description: "Free online JWT debugger. Decode and inspect JWT header, payload, and signature. All processing happens in your browser.",
+  title: "JWT Debugger - Decode JWT Header, Payload & Check Expiry Online",
+  description:
+    "Free online JWT debugger. Decode JWT tokens to inspect header, payload claims, and signature. Shows token expiry status. All decoding happens in your browser.",
   alternates: { canonical: "https://free-toolkit.com/jwt-debugger" },
 };
 
-const meta = { title: "JWT Debugger", description: "Decode and inspect JWT tokens to view header and payload contents.", path: "/jwt-debugger" };
+const meta = { title: "JWT Debugger", description: "Paste a JWT token to decode and inspect header, payload claims, expiry status, and signature preview.", path: "/jwt-debugger" };
 
 const faq = [
-  { question: "What is a JWT token?", answer: "JSON Web Token (JWT) is a compact, URL-safe way to represent claims between two parties. It consists of three Base64-encoded parts separated by dots: header, payload, and signature. JWTs are widely used for authentication and authorization." },
-  { question: "Is it safe to paste my JWT into an online tool?", answer: "This tool processes your JWT entirely in your browser — the token is never sent to any server. However, JWTs often contain sensitive data, so be cautious about where you paste them even with client-side tools." },
-  { question: "What can I see with this debugger?", answer: "The tool decodes the header (algorithm and token type) and payload (claims like subject, issuer, expiration). It also shows whether the token has expired and displays a truncated preview of the signature." },
+  { question: "How do I decode a JWT token?", answer: "Paste your JWT (the long Base64 string starting with eyJ...) into the input field. The tool automatically decodes the header and payload sections — no click needed. It shows the algorithm (e.g., HS256, RS256), token type, and all claims in the payload." },
+  { question: "How do I check if my JWT has expired?", answer: "The tool reads the exp (expiration) claim from the payload and shows whether the token is still valid, expired, or about to expire. Expired tokens are highlighted in red with the expiration date. Valid tokens show remaining time in green." },
+  { question: "Is it safe to paste real JWTs into this tool?", answer: "All decoding happens in your browser — the token is never transmitted to any server. However, JWTs often contain sensitive user data. Never share tokens publicly. Always treat decoded token contents as confidential." },
 ];
 
 export default function JwtPage() {
@@ -21,7 +22,7 @@ export default function JwtPage() {
     <ToolLayout meta={meta} faq={faq} seoContent={
       <div className="space-y-6">
         <h2>JWT Debugger & Decoder</h2>
-        <p>JSON Web Tokens (JWT) are used for secure information exchange. This tool decodes the header and payload of a JWT token for inspection. The token is processed entirely in your browser.</p>
+        <p>Decode and inspect JSON Web Tokens. View the header (algorithm, token type), payload (claims, expiry, issuer, subject), and a signature preview. The tool highlights expiry status — valid, nearing expiry, or expired — with color coding. Token processing stays entirely in your browser.</p>
       </div>
     }>
       <JwtTool />

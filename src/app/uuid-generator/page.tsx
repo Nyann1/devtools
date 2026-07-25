@@ -3,17 +3,18 @@ import { ToolLayout } from "@/components/tool-layout";
 import { UuidTool } from "./uuid-tool";
 
 export const metadata: Metadata = {
-  title: "UUID Generator - Generate UUID v4 & v7 Online Free",
-  description: "Free online UUID generator. Generate random UUIDv4 and time-based UUIDv7 identifiers. Batch generation supported. All processing happens in your browser.",
+  title: "UUID Generator - Generate UUID v4 Random & v7 Time-Based GUIDs Online",
+  description:
+    "Free online UUID generator. Generate UUID v4 (random) and UUID v7 (time-based, sortable) identifiers. Batch generate up to 100 UUIDs. Uses crypto.randomUUID() in your browser.",
   alternates: { canonical: "https://free-toolkit.com/uuid-generator" },
 };
 
-const meta = { title: "UUID Generator", description: "Generate UUID v4 (random) and UUID v7 (time-based) identifiers.", path: "/uuid-generator" };
+const meta = { title: "UUID Generator", description: "Generate UUID v4 (random) and UUID v7 (time-sortable) identifiers — batch up to 100 at once.", path: "/uuid-generator" };
 
 const faq = [
-  { question: "What is a UUID?", answer: "A Universally Unique Identifier (UUID) is a 128-bit number used to uniquely identify information. UUIDs are widely used as database keys, session IDs, and transaction IDs because the chance of collision is astronomically low." },
-  { question: "UUID v4 vs v7 — which should I use?", answer: "UUID v4 is fully random — good for general use. UUID v7 includes a timestamp prefix, making it sortable by creation time. Use v7 when you need database-friendly, time-ordered IDs that work well with B-tree indexes." },
-  { question: "Are UUIDs truly unique?", answer: "UUID v4 uses crypto.randomUUID(), generating 122 random bits. The probability of collision is roughly 1 in 2.7 × 10¹⁸ per UUID. You'd need to generate 1 billion UUIDs per second for 85 years to have a 50% chance of a single collision." },
+  { question: "How do I generate a random UUID v4?", answer: "Select the 'UUID v4' tab, set how many you need (1–100), and click Generate. Each UUID uses crypto.randomUUID() for cryptographically strong randomness. v4 UUIDs are fully random — ideal for general-purpose unique IDs." },
+  { question: "What is UUID v7 and when should I use it?", answer: "UUID v7 includes a Unix timestamp in milliseconds as the first 48 bits, making them naturally sortable by creation time. Use v7 for database primary keys — they work better with B-tree indexes than random v4 UUIDs. Switch to the UUID v7 tab to generate them." },
+  { question: "How do I copy or export generated UUIDs?", answer: "Hover over any UUID in the list and click the copy icon to copy that single UUID. The tool generates up to 100 UUIDs at a time, and you can generate new batches as many times as you want." },
 ];
 
 export default function UuidPage() {
@@ -21,7 +22,7 @@ export default function UuidPage() {
     <ToolLayout meta={meta} faq={faq} seoContent={
       <div className="space-y-6">
         <h2>Online UUID Generator</h2>
-        <p>Generate universally unique identifiers (UUIDs) for free. UUID v4 (random) and UUID v7 (time-based, sortable) are supported. All generation happens locally in your browser using the crypto.randomUUID() API.</p>
+        <p>Generate universally unique identifiers (UUIDs) in bulk. UUID v4 uses crypto.randomUUID() for random IDs. UUID v7 embeds a timestamp prefix for sortable, database-friendly IDs. Generate 1–100 UUIDs per batch — all generation happens locally in your browser.</p>
       </div>
     }>
       <UuidTool />
