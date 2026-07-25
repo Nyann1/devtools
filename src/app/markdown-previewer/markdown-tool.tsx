@@ -135,8 +135,8 @@ export function MarkdownTool() {
       setExporting(true);
       try {
         await generatePdf(html, columns);
-      } catch {
-        toast.error("PDF export failed");
+      } catch (e) {
+        toast.error(`PDF export failed: ${(e as Error).message || String(e)}`);
       } finally {
         setExporting(false);
       }
