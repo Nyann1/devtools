@@ -65,8 +65,10 @@ const FLAG_DESCS: Record<string, string> = {
 function tokenizeRegex(pattern: string): Token[] {
   const tokens: Token[] = [];
   let i = 0;
+  let safety = 0;
 
   while (i < pattern.length) {
+    if (safety++ > 500) break; // prevent infinite loop on malformed input
     if (pattern[i] === "\\" && i + 1 < pattern.length) {
       const seq = pattern[i] + pattern[i + 1];
       if (CHAR_CLASSES[seq]) {
@@ -204,7 +206,12 @@ function tokenizeRegex(pattern: string): Token[] {
     let literal = "";
     while (i < pattern.length) {
       const c = pattern[i];
-      if ("\\^$.[](){}*+?|".includes(c)) break;
+      if ("\\^$.[](){}*+?|".includes(c)) {
+        if (literal) break;
+        literal = c;
+        i++;
+        break;
+      }
       if (c === "{" && /\d/.test(pattern[i + 1] ?? "")) break;
       literal += c;
       i++;
