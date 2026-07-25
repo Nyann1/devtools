@@ -510,25 +510,27 @@ export function RegexTool() {
             placeholder="Search tokens..."
             className="font-mono text-xs h-7 mb-3"
           />
-          {filteredRef.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No matches</p>
-          ) : (
-            <div className="space-y-3">
-              {filteredRef.map((section) => (
-                <div key={section.title}>
-                  <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <div key={item.token} className="flex items-center gap-2 text-xs">
-                        <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
-                        <span className="text-muted-foreground truncate">{item.desc}</span>
-                      </div>
-                    ))}
+          <div className="max-h-72 overflow-y-auto">
+            {filteredRef.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No matches</p>
+            ) : (
+              <div className="space-y-3">
+                {filteredRef.map((section) => (
+                  <div key={section.title}>
+                    <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
+                    <div className="space-y-1">
+                      {section.items.map((item) => (
+                        <div key={item.token} className="flex items-center gap-2 text-xs">
+                          <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
+                          <span className="text-muted-foreground truncate">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
