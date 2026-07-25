@@ -51,7 +51,7 @@ export function Header() {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href="https://github.com"
+            href="https://github.com/Nyann1/devtools"
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
