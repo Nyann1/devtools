@@ -85,10 +85,10 @@ function tokenizeRegex(pattern: string): Token[] {
       i++;
       if (pattern[i] === "^") i++;
       while (i < pattern.length && pattern[i] !== "]") {
-        if (pattern[i] === "\\") i++; // skip escaped char
+        if (pattern[i] === "\\") i++;
         i++;
       }
-      if (i < pattern.length) i++; // skip ]
+      if (i < pattern.length) i++;
       const raw = pattern.slice(start, i);
       const negated = raw.startsWith("[^");
       tokens.push({ raw, type: "charset", desc: negated ? "matches any character NOT in the set" : "matches any character in the set" });
@@ -195,13 +195,12 @@ function tokenizeRegex(pattern: string): Token[] {
     if (ch === "{" && /\d/.test(pattern[i + 1] ?? "")) {
       const start = i;
       while (i < pattern.length && pattern[i] !== "}") i++;
-      if (i < pattern.length) i++; // skip }
+      if (i < pattern.length) i++;
       const raw = pattern.slice(start, i);
       tokens.push({ raw, type: "quantifier", desc: `matches exactly or between the specified number of times` });
       continue;
     }
 
-    // literal character(s) — group consecutive literals
     let literal = "";
     while (i < pattern.length) {
       const c = pattern[i];
@@ -231,31 +230,46 @@ function explainFlags(flags: string): Token[] {
 const REFERENCE = [
   { title: "Character Classes", items: [
     { token: "\\d", desc: "digit (0-9)" },
-    { token: "\\w", desc: "word char" },
-    { token: "\\s", desc: "whitespace" },
-    { token: ".", desc: "any char except \\n" },
-    { token: "\\D \\W \\S", desc: "inverse of above" },
+    { token: "\\w", desc: "word char (a-z, A-Z, 0-9, _)" },
+    { token: "\\s", desc: "whitespace (space, tab, newline)" },
+    { token: ".", desc: "any character except \\n" },
+    { token: "\\D \\W \\S", desc: "inverse of \\d \\w \\s" },
   ]},
   { title: "Quantifiers", items: [
-    { token: "*", desc: "0 or more" },
-    { token: "+", desc: "1 or more" },
-    { token: "?", desc: "0 or 1" },
-    { token: "{n}", desc: "exactly n" },
-    { token: "{n,m}", desc: "n to m" },
-    { token: "*? +?", desc: "lazy versions" },
+    { token: "*", desc: "0 or more (greedy)" },
+    { token: "+", desc: "1 or more (greedy)" },
+    { token: "?", desc: "0 or 1 (greedy)" },
+    { token: "{n}", desc: "exactly n times" },
+    { token: "{n,m}", desc: "n to m times" },
+    { token: "{n,}", desc: "n or more times" },
+    { token: "*? +?", desc: "lazy (non-greedy) versions" },
   ]},
   { title: "Groups & Lookaround", items: [
-    { token: "(...)", desc: "capture group" },
-    { token: "(?:...)", desc: "non-capturing" },
-    { token: "(?<name>...)", desc: "named group" },
-    { token: "(?=...)", desc: "lookahead" },
-    { token: "(?!...)", desc: "neg. lookahead" },
-    { token: "(?<=...)", desc: "lookbehind" },
+    { token: "(...)", desc: "capture group — stores match in $1, $2..." },
+    { token: "(?:...)", desc: "non-capturing group — no backreference" },
+    { token: "(?<name>...)", desc: "named group — access by name" },
+    { token: "(?=...)", desc: "positive lookahead" },
+    { token: "(?!...)", desc: "negative lookahead" },
+    { token: "(?<=...)", desc: "positive lookbehind" },
+    { token: "(?<!...)", desc: "negative lookbehind" },
   ]},
-  { title: "Anchors", items: [
-    { token: "^", desc: "start of string" },
-    { token: "$", desc: "end of string" },
+  { title: "Anchors & Boundaries", items: [
+    { token: "^", desc: "start of string (or line w/ m flag)" },
+    { token: "$", desc: "end of string (or line w/ m flag)" },
     { token: "\\b", desc: "word boundary" },
+    { token: "\\B", desc: "non-word boundary" },
+  ]},
+  { title: "Alternation & Misc", items: [
+    { token: "|", desc: "OR — match left or right side" },
+    { token: "\\", desc: "escape next character" },
+    { token: "[...]", desc: "character set — match any inside" },
+    { token: "[^...]", desc: "negated set — match anything NOT inside" },
+  ]},
+  { title: "Shorthand Examples", items: [
+    { token: "\\d{3}-\\d{4}", desc: "phone pattern (3 digits — 4 digits)" },
+    { token: "\\w+@\\w+\\.\\w+", desc: "simple email pattern" },
+    { token: "https?://.*", desc: "URL starting with http(s)" },
+    { token: "^[A-Z][a-z]+$", desc: "capitalized word (full line)" },
   ]},
 ];
 
@@ -272,6 +286,7 @@ export function RegexTool() {
   const [text, setText] = useState("");
   const [replace, setReplace] = useState("");
   const [mode, setMode] = useState<"match" | "replace">("match");
+  const [refSearch, setRefSearch] = useState("");
 
   const result = useMemo((): RegexResult | null => {
     if (!pattern || !text) return null;
@@ -319,6 +334,19 @@ export function RegexTool() {
 
   const flagTokens = useMemo(() => explainFlags(flags), [flags]);
 
+  const filteredRef = useMemo(() => {
+    if (!refSearch.trim()) return REFERENCE;
+    const q = refSearch.toLowerCase();
+    return REFERENCE
+      .map((section) => ({
+        ...section,
+        items: section.items.filter(
+          (item) => item.token.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [refSearch]);
+
   return (
     <div className="space-y-4">
       {/* Pattern & Flags */}
@@ -357,8 +385,9 @@ export function RegexTool() {
         <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Enter text to test against..." className="font-mono text-sm min-h-[160px] resize-y" spellCheck={false} />
       </div>
 
-      {/* Results */}
+      {/* Main layout: left content + right sidebar */}
       <div className="lg:grid lg:grid-cols-3 gap-6">
+        {/* Left: results area */}
         <div className="lg:col-span-2 space-y-4">
           {result && result.type === "error" && (
             <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4">
@@ -432,7 +461,7 @@ export function RegexTool() {
         </div>
 
         {/* Right Sidebar: Explanation + Reference */}
-        <div className="space-y-4">
+        <div className="space-y-4 mt-4 lg:mt-0">
           {/* Regex Explanation */}
           {(tokens.length > 0 || flagTokens.length > 0) && (
             <div className="border rounded-lg p-4">
@@ -468,22 +497,32 @@ export function RegexTool() {
 
           {/* Quick Reference */}
           <div className="border rounded-lg p-4">
-            <h3 className="text-sm font-semibold mb-3">Quick Reference</h3>
-            <div className="space-y-3">
-              {REFERENCE.map((section) => (
-                <div key={section.title}>
-                  <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
-                  <div className="space-y-1">
-                    {section.items.map((item) => (
-                      <div key={item.token} className="flex items-center gap-2 text-xs">
-                        <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
-                        <span className="text-muted-foreground truncate">{item.desc}</span>
-                      </div>
-                    ))}
+            <h3 className="text-sm font-semibold mb-2">Quick Reference</h3>
+            <Input
+              value={refSearch}
+              onChange={(e) => setRefSearch(e.target.value)}
+              placeholder="Search tokens..."
+              className="font-mono text-xs h-7 mb-3"
+            />
+            {filteredRef.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No matches</p>
+            ) : (
+              <div className="space-y-3">
+                {filteredRef.map((section) => (
+                  <div key={section.title}>
+                    <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
+                    <div className="space-y-1">
+                      {section.items.map((item) => (
+                        <div key={item.token} className="flex items-center gap-2 text-xs">
+                          <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
+                          <span className="text-muted-foreground truncate">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
