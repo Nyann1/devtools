@@ -376,8 +376,8 @@ export function RegexTool() {
           <div className="flex gap-2">
             <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
             <div className="relative flex-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-md">
-              <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono text-sm absolute inset-0 text-transparent caret-foreground bg-transparent border-input placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none" />
-              <div aria-hidden="true" className="font-mono text-sm h-9 px-3 py-1 rounded-md border border-transparent overflow-hidden whitespace-nowrap flex items-center pointer-events-none relative z-10">
+              <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono absolute inset-0 text-transparent caret-foreground bg-transparent border-input placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none" />
+              <div aria-hidden="true" className="font-mono text-base md:text-sm h-8 px-2.5 py-1 rounded-lg border border-transparent overflow-hidden whitespace-nowrap flex items-center pointer-events-none relative z-10 select-none">
                 {tokens.length > 0 ? (
                   tokens.map((t, i) => (
                     <span
