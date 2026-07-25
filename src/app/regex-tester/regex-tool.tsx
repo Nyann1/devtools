@@ -348,182 +348,180 @@ export function RegexTool() {
   }, [refSearch]);
 
   return (
-    <div className="space-y-4">
-      {/* Pattern & Flags */}
-      <div>
-        <label className="text-sm font-medium mb-1 block text-muted-foreground">Pattern</label>
-        <div className="flex gap-2">
-          <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
-          <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono flex-1" />
-          <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
-          <Input value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="g" className="font-mono w-20" />
+    <div className="lg:grid lg:grid-cols-3 gap-6">
+      {/* Left: inputs + results */}
+      <div className="lg:col-span-2 space-y-4">
+        {/* Pattern & Flags */}
+        <div>
+          <label className="text-sm font-medium mb-1 block text-muted-foreground">Pattern</label>
+          <div className="flex gap-2">
+            <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
+            <Input value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="Regular expression" className="font-mono flex-1" />
+            <span className="flex items-center px-2 border rounded-md bg-muted font-mono text-muted-foreground">/</span>
+            <Input value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="g" className="font-mono w-20" />
+          </div>
         </div>
-      </div>
 
-      {/* Mode Tabs */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setMode("match")}
-          className={`text-xs px-3 py-1 rounded-md border font-mono ${mode === "match" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-muted-foreground hover:text-foreground"}`}
-        >
-          Match
-        </button>
-        <button
-          onClick={() => setMode("replace")}
-          className={`text-xs px-3 py-1 rounded-md border font-mono ${mode === "replace" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-muted-foreground hover:text-foreground"}`}
-        >
-          Replace
-        </button>
-        {mode === "replace" && (
-          <Input value={replace} onChange={(e) => setReplace(e.target.value)} placeholder="Replacement text (use $1, $2 for groups)" className="font-mono text-sm flex-1 h-8" />
+        {/* Mode Tabs */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setMode("match")}
+            className={`text-xs px-3 py-1 rounded-md border font-mono ${mode === "match" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-muted-foreground hover:text-foreground"}`}
+          >
+            Match
+          </button>
+          <button
+            onClick={() => setMode("replace")}
+            className={`text-xs px-3 py-1 rounded-md border font-mono ${mode === "replace" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-muted-foreground hover:text-foreground"}`}
+          >
+            Replace
+          </button>
+          {mode === "replace" && (
+            <Input value={replace} onChange={(e) => setReplace(e.target.value)} placeholder="Replacement text (use $1, $2 for groups)" className="font-mono text-sm flex-1 h-8" />
+          )}
+        </div>
+
+        {/* Test String */}
+        <div>
+          <label className="text-sm font-medium mb-1 block text-muted-foreground">Test String</label>
+          <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Enter text to test against..." className="font-mono text-sm min-h-[160px] resize-y" spellCheck={false} />
+        </div>
+
+        {/* Results */}
+        {result && result.type === "error" && (
+          <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4">
+            <p className="text-sm text-destructive font-mono">{result.message}</p>
+          </div>
+        )}
+        {!pattern && (
+          <p className="text-sm text-muted-foreground">Enter a regex pattern to see explanation and matches</p>
+        )}
+        {result?.type === "none" && (
+          <p className="text-sm text-muted-foreground">No matches found</p>
+        )}
+
+        {/* Highlighted Matches */}
+        {result?.type === "matches" && mode === "match" && (
+          <>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-muted-foreground">{result.count} match{result.count !== 1 ? "es" : ""} found</span>
+            </div>
+            <div className="p-4 border rounded-lg bg-muted/10 font-mono text-sm whitespace-pre-wrap">
+              {result.parts.map((part, i) =>
+                part.startsWith("\x00") ? (
+                  <mark key={i} className="bg-emerald-200 dark:bg-emerald-800 rounded px-0.5">{part.slice(1, -1)}</mark>
+                ) : (
+                  <span key={i}>{part}</span>
+                )
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Replace Preview */}
+        {mode === "replace" && replacedText && (
+          <div>
+            <label className="text-sm font-medium mb-1.5 block text-muted-foreground">Replace Preview</label>
+            <div className="p-4 border rounded-lg bg-muted/10 font-mono text-sm whitespace-pre-wrap break-all">
+              {replacedText}
+            </div>
+          </div>
+        )}
+
+        {/* Match Details */}
+        {result?.type === "matches" && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">Match Details</h3>
+            {result.matches.map((m, i) => (
+              <div key={i} className="p-3 border rounded-md font-mono text-sm">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                  <span>Match {i + 1}</span>
+                  <span>at index {m.index}</span>
+                </div>
+                <code>{m.full}</code>
+                {m.groups.length > 0 && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Groups: {m.groups.map((g, j) => (
+                      <code key={j} className="mr-2 bg-muted px-1 rounded">${j + 1}: {g ?? "(undefined)"}</code>
+                    ))}
+                  </div>
+                )}
+                {Object.keys(m.namedGroups).length > 0 && (
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Named: {Object.entries(m.namedGroups).map(([k, v]) => (
+                      <code key={k} className="mr-2 bg-muted px-1 rounded">{k}: {v ?? "(undefined)"}</code>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Test String */}
-      <div>
-        <label className="text-sm font-medium mb-1 block text-muted-foreground">Test String</label>
-        <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Enter text to test against..." className="font-mono text-sm min-h-[160px] resize-y" spellCheck={false} />
-      </div>
-
-      {/* Main layout: left content + right sidebar */}
-      <div className="lg:grid lg:grid-cols-3 gap-6">
-        {/* Left: results area */}
-        <div className="lg:col-span-2 space-y-4">
-          {result && result.type === "error" && (
-            <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4">
-              <p className="text-sm text-destructive font-mono">{result.message}</p>
-            </div>
-          )}
-          {!pattern && (
-            <p className="text-sm text-muted-foreground">Enter a regex pattern to see explanation and matches</p>
-          )}
-          {result?.type === "none" && (
-            <p className="text-sm text-muted-foreground">No matches found</p>
-          )}
-
-          {/* Highlighted Matches */}
-          {result?.type === "matches" && mode === "match" && (
-            <>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-muted-foreground">{result.count} match{result.count !== 1 ? "es" : ""} found</span>
-              </div>
-              <div className="p-4 border rounded-lg bg-muted/10 font-mono text-sm whitespace-pre-wrap">
-                {result.parts.map((part, i) =>
-                  part.startsWith("\x00") ? (
-                    <mark key={i} className="bg-emerald-200 dark:bg-emerald-800 rounded px-0.5">{part.slice(1, -1)}</mark>
-                  ) : (
-                    <span key={i}>{part}</span>
-                  )
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Replace Preview */}
-          {mode === "replace" && replacedText && (
-            <div>
-              <label className="text-sm font-medium mb-1.5 block text-muted-foreground">Replace Preview</label>
-              <div className="p-4 border rounded-lg bg-muted/10 font-mono text-sm whitespace-pre-wrap break-all">
-                {replacedText}
-              </div>
-            </div>
-          )}
-
-          {/* Match Details */}
-          {result?.type === "matches" && (
+      {/* Right Sidebar: Explanation + Reference — aligned with Pattern & Test String */}
+      <div className="space-y-4">
+        {/* Regex Explanation */}
+        {(tokens.length > 0 || flagTokens.length > 0) && (
+          <div className="border rounded-lg p-4">
+            <h3 className="text-sm font-semibold mb-3">Explanation</h3>
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold">Match Details</h3>
-              {result.matches.map((m, i) => (
-                <div key={i} className="p-3 border rounded-md font-mono text-sm">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                    <span>Match {i + 1}</span>
-                    <span>at index {m.index}</span>
+              {tokens.map((t, i) => (
+                <div key={i} className="flex items-start gap-2 text-xs">
+                  <code className={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-mono text-xs ${
+                    t.type === "char-class" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
+                    t.type === "quantifier" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
+                    t.type === "anchor" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" :
+                    t.type === "group" || t.type === "lookaround" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                    t.type === "charset" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" :
+                    t.type === "alternation" ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
+                    t.type === "escape" ? "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400" :
+                    "bg-muted text-muted-foreground"
+                  }`}>{t.raw}</code>
+                  <span className="text-muted-foreground leading-relaxed">{t.desc}</span>
+                </div>
+              ))}
+              {flagTokens.length > 0 && tokens.length > 0 && (
+                <div className="border-t pt-2 mt-2" />
+              )}
+              {flagTokens.map((t, i) => (
+                <div key={`f${i}`} className="flex items-start gap-2 text-xs">
+                  <code className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-mono text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">{t.raw}</code>
+                  <span className="text-muted-foreground leading-relaxed">{t.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Reference */}
+        <div className="border rounded-lg p-4">
+          <h3 className="text-sm font-semibold mb-2">Quick Reference</h3>
+          <Input
+            value={refSearch}
+            onChange={(e) => setRefSearch(e.target.value)}
+            placeholder="Search tokens..."
+            className="font-mono text-xs h-7 mb-3"
+          />
+          {filteredRef.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No matches</p>
+          ) : (
+            <div className="space-y-3">
+              {filteredRef.map((section) => (
+                <div key={section.title}>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
+                  <div className="space-y-1">
+                    {section.items.map((item) => (
+                      <div key={item.token} className="flex items-center gap-2 text-xs">
+                        <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
+                        <span className="text-muted-foreground truncate">{item.desc}</span>
+                      </div>
+                    ))}
                   </div>
-                  <code>{m.full}</code>
-                  {m.groups.length > 0 && (
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Groups: {m.groups.map((g, j) => (
-                        <code key={j} className="mr-2 bg-muted px-1 rounded">${j + 1}: {g ?? "(undefined)"}</code>
-                      ))}
-                    </div>
-                  )}
-                  {Object.keys(m.namedGroups).length > 0 && (
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Named: {Object.entries(m.namedGroups).map(([k, v]) => (
-                        <code key={k} className="mr-2 bg-muted px-1 rounded">{k}: {v ?? "(undefined)"}</code>
-                      ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           )}
-        </div>
-
-        {/* Right Sidebar: Explanation + Reference */}
-        <div className="space-y-4 mt-4 lg:mt-0">
-          {/* Regex Explanation */}
-          {(tokens.length > 0 || flagTokens.length > 0) && (
-            <div className="border rounded-lg p-4">
-              <h3 className="text-sm font-semibold mb-3">Explanation</h3>
-              <div className="space-y-2">
-                {tokens.map((t, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs">
-                    <code className={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-mono text-xs ${
-                      t.type === "char-class" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                      t.type === "quantifier" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                      t.type === "anchor" ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" :
-                      t.type === "group" || t.type === "lookaround" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                      t.type === "charset" ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" :
-                      t.type === "alternation" ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" :
-                      t.type === "escape" ? "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400" :
-                      "bg-muted text-muted-foreground"
-                    }`}>{t.raw}</code>
-                    <span className="text-muted-foreground leading-relaxed">{t.desc}</span>
-                  </div>
-                ))}
-                {flagTokens.length > 0 && tokens.length > 0 && (
-                  <div className="border-t pt-2 mt-2" />
-                )}
-                {flagTokens.map((t, i) => (
-                  <div key={`f${i}`} className="flex items-start gap-2 text-xs">
-                    <code className="shrink-0 mt-0.5 px-1.5 py-0.5 rounded font-mono text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">{t.raw}</code>
-                    <span className="text-muted-foreground leading-relaxed">{t.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Quick Reference */}
-          <div className="border rounded-lg p-4">
-            <h3 className="text-sm font-semibold mb-2">Quick Reference</h3>
-            <Input
-              value={refSearch}
-              onChange={(e) => setRefSearch(e.target.value)}
-              placeholder="Search tokens..."
-              className="font-mono text-xs h-7 mb-3"
-            />
-            {filteredRef.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No matches</p>
-            ) : (
-              <div className="space-y-3">
-                {filteredRef.map((section) => (
-                  <div key={section.title}>
-                    <h4 className="text-xs font-medium text-muted-foreground mb-1.5">{section.title}</h4>
-                    <div className="space-y-1">
-                      {section.items.map((item) => (
-                        <div key={item.token} className="flex items-center gap-2 text-xs">
-                          <code className="shrink-0 px-1 py-0.5 rounded font-mono bg-muted">{item.token}</code>
-                          <span className="text-muted-foreground truncate">{item.desc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
