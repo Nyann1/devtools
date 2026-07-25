@@ -55,24 +55,26 @@ eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
 in culpa qui officia deserunt mollit anim id est laborum.
 `;
 
-async function generatePdf(html: string, columns: 1 | 2) {
-  const { default: html2pdf } = await import("html2pdf.js");
-  const container = document.createElement("div");
-  container.innerHTML = html;
-  container.style.fontFamily = '"Times New Roman", Georgia, serif';
-  container.style.fontSize = "12pt";
-  container.style.lineHeight = "1.6";
-  container.style.color = "#1a1a1a";
-  container.style.padding = "1.5rem";
-
-  if (columns === 2) {
-    container.style.columnCount = "2";
-    container.style.columnGap = "2rem";
-    container.style.columnRule = "1px solid #e5e7eb";
+function openPrintWindow(html: string, columns: 1 | 2) {
+  const w = window.open("", "_blank", "width=800,height=600");
+  if (!w) {
+    toast.error("Pop-up blocked. Please allow pop-ups for this site.");
+    return;
   }
 
-  const style = document.createElement("style");
-  style.textContent = `
+  w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Times New Roman", Georgia, serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #1a1a1a;
+      padding: 1.5rem;
+    }
     h1 { font-size: 1.6rem; border-bottom: 2px solid #333; padding-bottom: 0.3rem; margin-top: 0; }
     h2 { font-size: 1.3rem; border-bottom: 1px solid #ccc; padding-bottom: 0.2rem; }
     h3 { font-size: 1.1rem; }
@@ -83,37 +85,22 @@ async function generatePdf(html: string, columns: 1 | 2) {
     th { background: #f3f4f6; }
     blockquote { border-left: 3px solid #d1d5db; padding-left: 1rem; color: #6b7280; margin-left: 0; }
     img { max-width: 100%; }
-    ${columns === 2 ? `
-    @page { size: A4; margin: 1.5cm; }
-    ` : `
-    @page { size: A4; margin: 2cm; }
-    `}
-  `;
-  container.appendChild(style);
-
-  const filename = columns === 2 ? "markdown-two-column.pdf" : "markdown.pdf";
-
-  container.style.position = "absolute";
-  container.style.left = "-9999px";
-  container.style.top = "0";
-  container.style.width = columns === 2 ? "210mm" : "190mm";
-  container.style.background = "#fff";
-  document.body.appendChild(container);
-
-  await html2pdf().set({
-    margin: columns === 2 ? [5, 5, 5, 5] : 10,
-    filename,
-    image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  }).from(container).save();
-
-  document.body.removeChild(container);
+    ${columns === 2 ? "body { column-count: 2; column-gap: 2rem; column-rule: 1px solid #e5e7eb; }" : ""}
+    @media print {
+      body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      @page { size: A4; margin: ${columns === 2 ? "1.5cm" : "2cm"}; }
+    }
+  </style>
+</head>
+<body>${html}</body>
+</html>`);
+  w.document.close();
+  w.focus();
+  w.print();
 }
 
 export function MarkdownTool() {
   const [input, setInput] = useState(SAMPLE);
-  const [exporting, setExporting] = useState(false);
 
   const html = useMemo(() => {
     try {
@@ -129,33 +116,29 @@ export function MarkdownTool() {
     toast.success("HTML copied to clipboard");
   }, [html]);
 
-  const handleExport = useCallback(
-    async (columns: 1 | 2) => {
+  const handlePrint = useCallback(
+    (columns: 1 | 2) => {
       if (!html) return;
-      setExporting(true);
-      try {
-        await generatePdf(html, columns);
-      } catch (e) {
-        toast.error(`PDF export failed: ${(e as Error).message || String(e)}`);
-      } finally {
-        setExporting(false);
-      }
+      openPrintWindow(html, columns);
     },
     [html],
   );
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button onClick={copyHtml} variant="outline" size="sm">
           Copy HTML
         </Button>
-        <Button onClick={() => handleExport(1)} variant="outline" size="sm" disabled={exporting}>
-          {exporting ? "Exporting..." : "Download PDF"}
+        <Button onClick={() => handlePrint(1)} variant="outline" size="sm">
+          Export PDF (Single)
         </Button>
-        <Button onClick={() => handleExport(2)} variant="outline" size="sm" disabled={exporting}>
-          {exporting ? "Exporting..." : "Download PDF (Two Columns)"}
+        <Button onClick={() => handlePrint(2)} variant="outline" size="sm">
+          Export PDF (Two Columns)
         </Button>
+        <span className="text-xs text-muted-foreground ml-1">
+          Choose "Save as PDF" in the print dialog
+        </span>
         <Button onClick={() => setInput("")} variant="ghost" size="sm">
           Clear
         </Button>
